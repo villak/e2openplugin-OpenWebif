@@ -485,7 +485,14 @@ class WebController(BaseController):
 
 		showProviders = True if getUrlArg(request, "showproviders", "0") in ("1", "true") else False
 
-		bouquets = getAllServices(type=type, noiptv=noiptv, nolastscanned=nolastscanned, removeNameFromsref=removeNameFromsref, showAll=showAll, showProviders=showProviders)
+		excludes = getUrlArg(request, "exclude", "").lower()
+		excludes = excludes.split(",")
+		excludeProgram = "program" in excludes
+		excludeVOD = "vod" in excludes
+		excludeIPTV = "iptv" in excludes
+		excludeLastScanned = "lastscanned" in excludes
+
+		bouquets = getAllServices(type=type, noiptv=noiptv or excludeIPTV, nolastscanned=nolastscanned or excludeLastScanned, removeNameFromsref=removeNameFromsref, showAll=showAll, showProviders=showProviders, excludeProgram=excludeProgram, excludeVOD=excludeVOD)
 		if b"renameserviceforxmbc" in list(request.args.keys()):
 			for bouquet in bouquets["services"]:
 				for service in bouquet["subservices"]:

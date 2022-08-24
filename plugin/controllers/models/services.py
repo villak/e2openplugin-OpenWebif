@@ -547,7 +547,7 @@ def getChannels(idbouquet, stype):
 	return {"channels": ret}
 
 
-def getServices(sRef, showAll=True, showHidden=False, pos=0, showProviders=False, picon=False, noiptv=False, removeNameFromsref=False):
+def getServices(sRef, showAll=True, showHidden=False, pos=0, showProviders=False, picon=False, noiptv=False, removeNameFromsref=False, excludeProgram=False, excludeVOD=False):
 	starttime = datetime.now()
 	services = []
 	allproviders = {}
@@ -594,9 +594,13 @@ def getServices(sRef, showAll=True, showHidden=False, pos=0, showProviders=False
 					oPos = oPos + 1
 					if not sp and flags & 64:  # eServiceReference.isMarker:
 						oPos = oPos - 1
+
 		showiptv = True
 		if noiptv:
 			if '4097:' in sref or '5002:' in sref or 'http%3a' in sref or 'https%3a' in sref:
+				showiptv = False
+		elif excludeVOD:  # no VOD
+			if '/movie/' in sref and ('4097:' in sref or '5002:' in sref or 'http%3a' in sref or 'https%3a' in sref):  # is VOD
 				showiptv = False
 
 		flags = int(sitem[0].split(":")[1])
@@ -614,7 +618,8 @@ def getServices(sRef, showAll=True, showHidden=False, pos=0, showProviders=False
 					service['picon'] = getPicon(sr)
 				service['servicename'] = convertUnicode(sitem[1])
 				service['servicereference'] = sr
-				service['program'] = int(service['servicereference'].split(':')[3], 16)
+				if not excludeProgram:
+					service['program'] = int(service['servicereference'].split(':')[3], 16)
 				if showProviders:
 					if sitem[0] in allproviders:
 						service['provider'] = allproviders[sitem[0]]
@@ -631,7 +636,7 @@ def getServices(sRef, showAll=True, showHidden=False, pos=0, showProviders=False
 	}
 
 
-def getAllServices(type, noiptv=False, nolastscanned=False, removeNameFromsref=False, showAll=True, showProviders=False):
+def getAllServices(type, noiptv=False, nolastscanned=False, removeNameFromsref=False, showAll=True, showProviders=False, excludeProgram=False, excludeVOD=False):
 	starttime = datetime.now()
 	services = []
 	if type is None:
@@ -641,7 +646,7 @@ def getAllServices(type, noiptv=False, nolastscanned=False, removeNameFromsref=F
 	for bouquet in bouquets:
 		if nolastscanned and 'LastScanned' in bouquet[0]:
 			continue
-		sv = getServices(sRef=bouquet[0], showAll=showAll, showHidden=False, pos=pos, showProviders=showProviders, noiptv=noiptv, removeNameFromsref=removeNameFromsref)
+		sv = getServices(sRef=bouquet[0], showAll=showAll, showHidden=False, pos=pos, showProviders=showProviders, noiptv=noiptv, removeNameFromsref=removeNameFromsref, excludeProgram=excludeProgram, excludeVOD=excludeVOD)
 		services.append({
 			"servicereference": bouquet[0],
 			"servicename": bouquet[1],

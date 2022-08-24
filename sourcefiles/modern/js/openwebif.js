@@ -2107,7 +2107,7 @@ function GetAllServices(callback,radio)
 		}
 	}
 	$.ajax({
-		url: '/api/getallservices?renameserviceforxmbc=1&nolastscanned=1'+ru,
+		url: '/api/getallservices?renameserviceforxmbc=1&exclude=lastscanned,vod,program'+ru,
 		dataType: "json",
 		success: function ( data ) {
 			var sdata = JSON.stringify(data);
